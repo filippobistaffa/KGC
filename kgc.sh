@@ -3,16 +3,24 @@
 red='\033[0;31m'			# Red
 nc='\033[0m'				# No color
 re='^[0-9]+$'				# Regular expression to detect natural numbers
+k=5					# Default k = 5
 
-usage() { echo -e "Usage: $0 -i <filename> [-c]\n-i\tInput filename\n-c\tEnable CSV output (optional)" 1>&2; exit 1; }
+usage() { echo -e "Usage: $0 -i <filename> [-k <max_card>] [-c]\n-i\tInput filename\n-s\tMaximum cardinality (optional, default k = 5)\n-c\tEnable CSV output (optional)" 1>&2; exit 1; }
 
-while getopts ":i:s:c" o; do
+while getopts ":i:k:c" o; do
 	case "${o}" in
 	i)
 		i=${OPTARG}
 		if [ ! -f "$i" ]
 		then
 			echo -e "${red}Input file \"$i\" not found!${nc}\n" 1>&2
+			usage
+		fi
+		;;
+	k)
+		k=${OPTARG}
+		if ! [[ $k =~ $re ]] ; then
+			echo -e "${red}Parameter k must be a number!${nc}\n"
 			usage
 		fi
 		;;
@@ -33,12 +41,14 @@ then
 	usage
 fi
 
-N=`sed '1q;d' $i`	# Number of agents
-K=`sed '2q;d' $i`	# Maximum cardinality
+e=`cat "$i" | wc -l`
+n=`grep -v " " "$i" | wc -l`
+e=$(( $e - $n ))
 
 tmp=`mktemp`
-echo "#define N $N" > $tmp
-echo "#define K $K" >> $tmp
+echo "#define N $n" > $tmp
+echo "#define E $e" >> $tmp
+echo "#define K $k" >> $tmp
 
 if [ ! -z "${c}" ]
 then
@@ -65,5 +75,5 @@ if [[ $? == 0 ]]
 then
 	bin=$0
 	bin=${bin%???}
-	$bin $i $s
+	$bin $i
 fi
