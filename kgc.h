@@ -6,9 +6,18 @@
 #include <string.h>
 #include <sys/time.h>
 
+// CPLEX
+#include <ilcplex/ilocplex.h>
+
 #include "instance.h"
 #include "params.h"
 #include "macros.h"
 #include "types.h"
+
+using namespace std;
+
+#ifdef CSV
+#undef DEBUG
+#endif
 
 #endif /* KGC_H_ */
