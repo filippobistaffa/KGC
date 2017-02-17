@@ -117,6 +117,7 @@ int main(int argc, char *argv[]) {
 	puts("");
 	#endif
 
+	/*
 	// Alone variables
 
 	IloIntVarArray na(env, N);
@@ -180,6 +181,7 @@ int main(int argc, char *argv[]) {
 		model.add(nla[i] <= N * hla[i]);
 		lexpr.end();
 	}
+	*/
 
 	// Create objective expression
 
