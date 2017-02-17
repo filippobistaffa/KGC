@@ -212,6 +212,10 @@ int main(int argc, char *argv[]) {
 	cplex.setParam(IloCplex::Threads, 1);
 	#endif
 
+	#ifdef TOLERANCE
+	cplex.setParam(IloCplex::EpGap, TOLERANCE);
+	#endif
+
 	try {
 		if (!cplex.solve()) {
 			#ifndef CSV

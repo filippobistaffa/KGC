@@ -1,3 +1,6 @@
+// Relative (%) optimality gap tolerance
+#define TOLERANCE 0.01
+
 // Enable parallelism
 #define PARALLEL
 
