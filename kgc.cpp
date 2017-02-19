@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 			pch++;
 			la[i] = 1;
 		}
-		adj[i * N + i] = atof(pch);
+		IJ(adj, i, i) = atof(pch);
 	}
 
 	for (id i = 0; i < E; i++) {
