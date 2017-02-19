@@ -48,7 +48,8 @@ int main(int argc, char *argv[]) {
 
 	// Allocate data structures
 
-	value *adj = (value *)calloc(N * N, sizeof(value));
+	value *wm = (value *)calloc(N * N, sizeof(value));
+	uint8_t *adj = (uint8_t *)calloc(N * N, sizeof(uint8_t));
 	uint8_t *la = (uint8_t *)calloc(N, sizeof(uint8_t));
 
 	// Read input file
@@ -64,14 +65,15 @@ int main(int argc, char *argv[]) {
 			pch++;
 			la[i] = 1;
 		}
-		IJ(adj, i, i) = atof(pch);
+		IJ(wm, i, i) = atof(pch);
 	}
 
 	for (id i = 0; i < E; i++) {
 		id v1, v2;
 		value w;
 		fscanf(f, "%u %u %f", &v1, &v2, &w);
-		IJ(adj, v1, v2) = IJ(adj, v2, v1) = w;
+		IJ(wm, v1, v2) = IJ(wm, v2, v1) = w;
+		IJ(adj, v1, v2) = IJ(adj, v2, v1) = 1;
 	}
 
 	fclose(f);
@@ -79,7 +81,7 @@ int main(int argc, char *argv[]) {
 	#ifdef DEBUG
 	puts("Weights:");
 	for (id i = 0; i < N; i++)
-		printbuf(adj + i * N, N, NULL, "%+.4f");
+		printbuf(wm + i * N, N, NULL, "%+08.4f");
 	puts("");
 	printbuf(la, N, "Leaders", "%hu", "\n");
 	puts("");
@@ -225,7 +227,7 @@ int main(int argc, char *argv[]) {
 
 	for (id i = 0; i < N; i++)
 		for (id j = i; j < N; j++)
-			objexpr += IJ(adj, i, j) * IJ(xa, i, j);
+			objexpr += IJ(wm, i, j) * IJ(xa, i, j);
 
 	#ifdef DEBUG
 	cout << "Objective function:" << endl << objexpr << endl << endl;
@@ -287,6 +289,7 @@ int main(int argc, char *argv[]) {
 	// Free data structures
 
 	free(adj);
+	free(wm);
 	free(la);
 
 	return 0;
