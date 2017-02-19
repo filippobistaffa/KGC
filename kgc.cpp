@@ -42,7 +42,7 @@ void printvarmatrix(type &ia, IloCplex cplex, const char *name = NULL, const cha
 
 int main(int argc, char *argv[]) {
 
-	#ifdef DEBUG
+	#ifndef CSV
 	printf("# Vertices = %u\n# Edges = %u\nMaximum cardinality = %u\n\n", N, E, K);
 	#endif
 
