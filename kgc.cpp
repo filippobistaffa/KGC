@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 
 	// Cardinality constraints
 
-	IloIntVarArray ca(env, N); // cardinality variables
+	IloIntVarArray ka(env, N); // cardinality variables
 
 	#ifdef DEBUG
 	puts("Cardinality constraints:");
@@ -108,19 +108,19 @@ int main(int argc, char *argv[]) {
 
 	for (id i = 0; i < N; i++) {
 
-		ostr << "C_" << i;
-		ca[i] = IloIntVar(env, 0, K, ostr.str().c_str());
+		ostr << "K_" << i;
+		ka[i] = IloIntVar(env, 0, K, ostr.str().c_str());
 		ostr.str("");
 		IloExpr cardexpr(env);
 
 		for (id j = 0; j < N; j++)
-			cardexpr += xa[i * N + j];
+			cardexpr += IJ(xa, i, j);
 
 		#ifdef DEBUG
 		cout << (cardexpr <= K) << endl;
 		#endif
 
-		model.add(ca[i] == cardexpr);
+		model.add(ka[i] == cardexpr);
 		model.add(cardexpr <= K);
 		cardexpr.end();
 	}
