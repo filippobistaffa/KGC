@@ -146,19 +146,14 @@ int main(int argc, char *argv[]) {
 	#endif
 
 	for (id i = 0; i < N; i++) {
-
 		ostr << "K_" << i;
 		ka[i] = IloIntVar(env, 0, K, ostr.str().c_str());
 		ostr.str("");
 		IloExpr cardexpr(env);
-
-		for (id j = 0; j < N; j++)
-			cardexpr += IJ(xa, i, j);
-
+		for (id j = 0; j < N; j++) cardexpr += IJ(xa, i, j);
 		#ifdef DEBUG
 		cout << (cardexpr <= K) << endl;
 		#endif
-
 		model.add(ka[i] == cardexpr);
 		model.add(cardexpr <= K);
 		cardexpr.end();
@@ -167,6 +162,29 @@ int main(int argc, char *argv[]) {
 	#ifdef DEBUG
 	puts("");
 	#endif
+
+	IloIntVarArray kia(env, N); // cardinality-up-to-i variables
+	IloIntVarArray kiba(env, N); // ki variables casted to booleans
+	IloIntVarArray cfa(env, N); // cluster first variables (negated kib)
+
+	for (id i = 0; i < N; i++) {
+		ostr << "KI_" << i;
+		kia[i] = IloIntVar(env, 0, K, ostr.str().c_str());
+		ostr.str("");
+		ostr << "KIB_" << i;
+		kiba[i] = IloIntVar(env, 0, 1, ostr.str().c_str());
+		ostr.str("");
+		ostr << "CF_" << i;
+		cfa[i] = IloIntVar(env, 0, 1, ostr.str().c_str());
+		ostr.str("");
+		IloExpr cardexpr(env);
+		for (id j = 0; j < i; j++) cardexpr += IJ(xa, i, j);
+		model.add(kia[i] == cardexpr);
+		model.add(kiba[i] <= kia[i]);
+		model.add(kia[i] <= K * kiba[i]);
+		model.add(cfa[i] == 1 - kiba[i]);
+		cardexpr.end();
+	}
 
 	/*
 	// Alone variables
