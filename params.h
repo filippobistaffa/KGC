@@ -9,3 +9,6 @@
 
 // Maximum number of leaders per cluster
 #define MAXLEADERS N
+
+// Print DOT code of graph
+#define DOT

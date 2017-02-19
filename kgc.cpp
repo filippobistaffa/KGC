@@ -58,6 +58,10 @@ int main(int argc, char *argv[]) {
 	char line[MAXLINE];
 	FILE *f = fopen(argv[1], "r");
 
+	#ifdef DOT
+	puts("graph G {");
+	#endif
+
 	for (id i = 0; i < N; i++) {
 		fgets(line, MAXLINE, f);
 		char *pch = line;
@@ -66,6 +70,9 @@ int main(int argc, char *argv[]) {
 			la[i] = 1;
 		}
 		IJ(wm, i, i) = atof(pch);
+		#ifdef DOT
+		printf("\t%u -- %u [label=\"%f\"];\n", i, i, IJ(wm, i, i));
+		#endif
 	}
 
 	for (id i = 0; i < E; i++) {
@@ -74,8 +81,14 @@ int main(int argc, char *argv[]) {
 		fscanf(f, "%u %u %f", &v1, &v2, &w);
 		IJ(wm, v1, v2) = IJ(wm, v2, v1) = w;
 		IJ(adj, v1, v2) = IJ(adj, v2, v1) = 1;
+		#ifdef DOT
+		printf("\t%u -- %u [label=\"%f\"];\n", v1, v2, w);
+		#endif
 	}
 
+	#ifdef DOT
+	puts("}\n");
+	#endif
 	fclose(f);
 
 	#ifdef DEBUG
