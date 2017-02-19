@@ -98,6 +98,10 @@ int main(int argc, char *argv[]) {
 
 	// Cardinality constraints
 
+	#ifdef DEBUG
+	puts("Cardinality constraints:");
+	#endif
+
 	for (id i = 0; i < N; i++) {
 
 		IloExpr cardexpr(env);
@@ -192,7 +196,7 @@ int main(int argc, char *argv[]) {
 			objexpr += adj[i * N + j] * xa[i * N + j];
 
 	#ifdef DEBUG
-	cout << endl << objexpr << endl << endl;
+	cout << "Objective function:" << endl << objexpr << endl << endl;
 	#endif
 
 	model.add(IloMaximize(env, objexpr));
