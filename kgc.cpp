@@ -4,7 +4,7 @@
 
 template <typename type>
 __attribute__((always_inline)) inline
-void printvars(type &ia, IloCplex cplex) {
+void printvararray(type &ia, IloCplex cplex) {
 
 	for (id i = 0; i < ia.getSize(); i++) {
 		try {
@@ -13,6 +13,30 @@ void printvars(type &ia, IloCplex cplex) {
 		}
 		catch (IloException& e) { e.end(); }
 	}
+	puts("");
+}
+
+template <typename type>
+__attribute__((always_inline)) inline
+void printvarmatrix(type &ia, IloCplex cplex, const char *name = NULL, const char *format = NULL) {
+
+	if (name) printf("%s =\n", name);
+
+	for (id i = 0; i < N; i++) {
+		printf("[ ");
+		for (id j = 0; j < N; j++) {
+			try {
+				if (format) { printf(format, cplex.getValue(IJ(ia, i, j))); printf(" "); }
+				else std::cout << cplex.getValue(IJ(ia, i, j)) << " ";
+			}
+			catch (IloException& e) {
+				if (format) { printf(format, 0); printf(" "); }
+				else std::cout << 0 << " ";
+			e.end(); }
+		}
+		puts("]");
+	}
+
 	puts("");
 }
 
@@ -251,7 +275,8 @@ int main(int argc, char *argv[]) {
 	printf("%f,%f\n", cplex.getObjValue(), (double)(t2.tv_usec - t1.tv_usec) / 1e6 + t2.tv_sec - t1.tv_sec);
 	#else
 	puts("");
-	printvars(xa, cplex);
+	printvarmatrix(xa, cplex, "X");
+	printvarmatrix(fa, cplex, "F");
 	//printvars(a, cplex);
 	//printvars(nla, cplex);
 	//printvars(hla, cplex);
