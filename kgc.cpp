@@ -1,5 +1,7 @@
 #include "kgc.h"
 
+#define IJ(BUF, I, J) ((BUF)[I * N + J])
+
 template <typename type>
 __attribute__((always_inline)) inline
 void printvars(type &ia, IloCplex cplex) {
@@ -45,7 +47,7 @@ int main(int argc, char *argv[]) {
 		id v1, v2;
 		value w;
 		fscanf(f, "%u %u %f", &v1, &v2, &w);
-		adj[v1 * N + v2] = adj[v2 * N + v1] = w;
+		IJ(adj, v1, v2) = IJ(adj, v2, v1) = w;
 	}
 
 	fclose(f);
@@ -71,29 +73,29 @@ int main(int argc, char *argv[]) {
 	for (id i = 0; i < N; i++)
 		for (id j = 0; j < N; j++) {
 			ostr << "X_" << i << "," << j;
-			xa[i * N + j] = IloIntVar(env, 0, 1, ostr.str().c_str());
+			IJ(xa, i, j) = IloIntVar(env, 0, 1, ostr.str().c_str());
 			ostr.str("");
 		}
 
 	// Reflexivity constraints
 
 	for (id i = 0; i < N; i++)
-		model.add(xa[i * N + i] == 1);
+		model.add(IJ(xa, i, i) == 1);
 
 	// Simmetry constraints
 
 	for (id i = 0; i < N; i++)
 		for (id j = i + 1; j < N; j++)
-			model.add(xa[i * N + j] == xa[j * N + i]);
+			model.add(IJ(xa, i, j) == IJ(xa, j, i));
 
 	// Transitivity constraints
 
 	for (id i = 0; i < N; i++)
 		for (id j = i + 1; j < N; j++)
 			for (id k = j + 1; k < N; k++) {
-				model.add(xa[i * N + j] + xa[j * N + k] - 2 * xa[i * N + k] <= 1);
-				model.add(xa[i * N + k] + xa[i * N + j] - 2 * xa[j * N + k] <= 1);
-				model.add(xa[j * N + k] + xa[i * N + k] - 2 * xa[i * N + j] <= 1);
+				model.add(IJ(xa, i, j) + IJ(xa, j, k) - 2 * IJ(xa, i, k) <= 1);
+				model.add(IJ(xa, i, k) + IJ(xa, i, j) - 2 * IJ(xa, j, k) <= 1);
+				model.add(IJ(xa, j, k) + IJ(xa, i, k) - 2 * IJ(xa, i, j) <= 1);
 			}
 
 	// Cardinality constraints
@@ -146,7 +148,7 @@ int main(int argc, char *argv[]) {
 		IloExpr aexpr(env);
 
 		for (id j = 0; j < N; j++)
-			if (i != j) aexpr += xa[i * N + j];
+			if (i != j) aexpr += IJ(xa, i, j);
 
 		#ifdef DEBUG
 		cout << (na[i] <= lexpr) << endl;
@@ -178,7 +180,7 @@ int main(int argc, char *argv[]) {
 		lexpr += la[i];
 
 		for (id j = 0; j < N; j++)
-			if (i != j) lexpr += xa[i * N + j] * la[j];
+			if (i != j) lexpr += IJ(xa, i, j) * la[j];
 
 		#ifdef DEBUG
 		cout << (nla[i] == lexpr) << endl;
@@ -199,7 +201,7 @@ int main(int argc, char *argv[]) {
 
 	for (id i = 0; i < N; i++)
 		for (id j = i; j < N; j++)
-			objexpr += adj[i * N + j] * xa[i * N + j];
+			objexpr += IJ(adj, i, j) * IJ(xa, i, j);
 
 	#ifdef DEBUG
 	cout << "Objective function:" << endl << objexpr << endl << endl;
