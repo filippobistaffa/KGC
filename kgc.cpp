@@ -195,9 +195,15 @@ int main(int argc, char *argv[]) {
 	for (id i = 0; i < N; i++)
 		for (id j = 0; j < N; j++)
 			for (id k = 0; k < N; k++) {
+				#ifdef CONSERVATIVE
+				model.add(IloIfThen(env, IJ(xa, i, j) == 1 && IJ(xa, j, k) == 1, IJ(xa, i, k) == 1));
+				model.add(IloIfThen(env, IJ(xa, i, k) == 1 && IJ(xa, i, j) == 1, IJ(xa, j, k) == 1));
+				model.add(IloIfThen(env, IJ(xa, j, k) == 1 && IJ(xa, i, k) == 1, IJ(xa, i, j) == 1));
+				#else
 				model.add(IJ(xa, i, j) + IJ(xa, j, k) - 2 * IJ(xa, i, k) <= 1);
 				model.add(IJ(xa, i, k) + IJ(xa, i, j) - 2 * IJ(xa, j, k) <= 1);
 				model.add(IJ(xa, j, k) + IJ(xa, i, k) - 2 * IJ(xa, i, j) <= 1);
+				#endif
 			}
 
 	// Cardinality constraints
