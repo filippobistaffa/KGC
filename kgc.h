@@ -2,6 +2,7 @@
 #define KGC_H_
 
 #include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
