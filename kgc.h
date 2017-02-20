@@ -19,6 +19,7 @@ using namespace std;
 
 #ifdef CSV
 #undef DEBUG
+#undef DOT
 #endif
 
 #endif /* KGC_H_ */
