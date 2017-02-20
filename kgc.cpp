@@ -232,6 +232,8 @@ int main(int argc, char *argv[]) {
 	puts("");
 	#endif
 
+	#ifdef LEADERS // LEADERS-only section
+
 	IloIntVarArray kia(env, N); // cardinality-up-to-i variables
 	IloIntVarArray sfa(env, N); // source flow variables
 
@@ -251,57 +253,42 @@ int main(int argc, char *argv[]) {
 	}
 
 	/*
+
 	// Alone variables
 
-	IloIntVarArray na(env, N);
-	IloIntVarArray a(env, N); // is i alone?
+	IloIntVarArray ala(env, N); // is i alone?
 
 	for (id i = 0; i < N; i++) {
 
-		ostr << "NA_" << i;
-		na[i] = IloIntVar(env, 0, 1, ostr.str().c_str());
+		ostr << "AL_" << i;
+		ala[i] = IloIntVar(env, 0, 1, ostr.str().c_str());
 		ostr.str("");
 
-		ostr << "A_" << i;
-		a[i] = IloIntVar(env, 0, 1, ostr.str().c_str());
-		ostr.str("");
-
-		IloExpr aexpr(env);
-
-		for (id j = 0; j < N; j++)
-			if (i != j) aexpr += IJ(xa, i, j);
-
-		#ifdef DEBUG
-		cout << (na[i] <= lexpr) << endl;
-		cout << (lexpr <= (N - 1) * na[i]) << endl;
-		#endif
-
-		model.add(na[i] <= aexpr);
-		model.add(aexpr <= N * na[i]);
-		model.add(a[i] == 1 - na[i]);
-		aexpr.end();
+		model.add(IloIfThen(env, ka[i] == 1, ala[i] == 1));
+		model.add(IloIfThen(env, ka[i] > 1, ala[i] == 0));
 	}
+
+	*/
 
 	// Leaders variables
 
 	IloIntVarArray nla(env, N); // number of leaders in the cluster of i
-	IloIntVarArray hla(env, N); // does the cluster of i have a leader?
+	//IloIntVarArray hla(env, N); // does the cluster of i have a leader?
 
 	for (id i = 0; i < N; i++) {
 
 		ostr << "NL_" << i;
-		nla[i] = IloIntVar(env, 0, N, ostr.str().c_str());
+		nla[i] = IloIntVar(env, 0, K, ostr.str().c_str());
 		ostr.str("");
 
-		ostr << "HL_" << i;
-		hla[i] = IloIntVar(env, 0, 1, ostr.str().c_str());
-		ostr.str("");
+		//ostr << "HL_" << i;
+		//hla[i] = IloIntVar(env, 0, 1, ostr.str().c_str());
+		//ostr.str("");
 
 		IloExpr lexpr(env);
-		lexpr += la[i];
 
 		for (id j = 0; j < N; j++)
-			if (i != j) lexpr += IJ(xa, i, j) * la[j];
+			lexpr += IJ(xa, i, j) * la[j];
 
 		#ifdef DEBUG
 		cout << (nla[i] == lexpr) << endl;
@@ -310,11 +297,11 @@ int main(int argc, char *argv[]) {
 
 		model.add(nla[i] == lexpr);
 		model.add(nla[i] <= MAXLEADERS);
-		model.add(hla[i] <= nla[i]);
-		model.add(nla[i] <= N * hla[i]);
+		//model.add(hla[i] <= nla[i]);
+		//model.add(nla[i] <= N * hla[i]);
 		lexpr.end();
+		model.add(ka[i] <= 1 || nla[i] >= 1);
 	}
-	*/
 
 	// Connectivity constraints
 
@@ -351,6 +338,8 @@ int main(int argc, char *argv[]) {
 	#ifdef DEBUG
 	puts("");
 	#endif
+
+	#endif // LEADERS-only section
 
 	// Create objective expression
 
@@ -409,7 +398,9 @@ int main(int argc, char *argv[]) {
 	#ifdef DEBUG
 	assert(checksimmetry(xa, cplex));
 	assert(checktransitivity(xa, cplex));
+	#ifdef LEADERS
 	assert(checkflow(xa, sfa, fa, cplex, adj));
+	#endif
 	#endif
 
 	gettimeofday(&t2, NULL);
@@ -429,13 +420,13 @@ int main(int argc, char *argv[]) {
 	#else
 	puts("");
 	printvarmatrix(xa, cplex, "X");
+	#ifdef LEADERS
 	printvarmatrix(fa, cplex, "F");
-	//printvararray(ka, cplex);
-	//printvararray(kia, cplex);
-	//printvararray(kiba, cplex);
+	printvararray(ka, cplex);
+	printvararray(kia, cplex);
 	printvararray(sfa, cplex);
-	//printvars(nla, cplex);
-	//printvars(hla, cplex);
+	printvararray(nla, cplex);
+	#endif
 	env.out() << "Optimal solution = " << cplex.getObjValue() << endl;
 	printf("Clock elapsed time = %f\n", (double)(t2.tv_usec - t1.tv_usec) / 1e6 + t2.tv_sec - t1.tv_sec);
 	#endif
