@@ -36,7 +36,8 @@ void printvarmatrix(type &ia, IloCplex &cplex, const char *name = NULL, const ch
 			catch (IloException& e) {
 				if (format) { printf(format, 0); printf(" "); }
 				else std::cout << 0 << " ";
-			e.end(); }
+				e.end();
+			}
 		}
 		puts("]");
 	}
