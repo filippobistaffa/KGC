@@ -110,7 +110,9 @@ int main(int argc, char *argv[]) {
 
 	value *wm = (value *)calloc(N * N, sizeof(value));
 	uint8_t *adj = (uint8_t *)calloc(N * N, sizeof(uint8_t));
+	#ifdef LEADERS
 	uint8_t *la = (uint8_t *)calloc(N, sizeof(uint8_t));
+	#endif
 
 	// Read input file
 
@@ -127,7 +129,9 @@ int main(int argc, char *argv[]) {
 		char *pch = line;
 		if (*pch == '*') {
 			pch++;
+			#ifdef LEADERS
 			la[i] = 1;
+			#endif
 		}
 		IJ(wm, i, i) = atof(pch);
 		#ifdef DOT
@@ -156,8 +160,10 @@ int main(int argc, char *argv[]) {
 	for (id i = 0; i < N; i++)
 		printbuf(wm + i * N, N, NULL, "%+08.4f");
 	puts("");
+	#ifdef LEADERS
 	printbuf(la, N, "Leaders", "%hu", "\n");
 	puts("");
+	#endif
 	#endif
 
 	// Create CPLEX model
@@ -440,7 +446,9 @@ int main(int argc, char *argv[]) {
 
 	free(adj);
 	free(wm);
+	#ifdef LEADERS
 	free(la);
+	#endif
 
 	return 0;
 }
