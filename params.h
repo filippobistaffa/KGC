@@ -16,5 +16,5 @@
 // Print DOT code of graph
 #define DOT
 
-// Use conservative constraints for transitivity (slower but less prone to errors)
+// Use conservative constraints for transitivity (slower but not prone to errors)
 //#define CONSERVATIVE
