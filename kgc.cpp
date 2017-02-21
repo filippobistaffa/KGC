@@ -8,7 +8,7 @@ void printvararray(type &ia, IloCplex &cplex) {
 
 	for (id i = 0; i < ia.getSize(); i++) {
 		try {
-			if (abs(cplex.getValue(ia[i])) > EPSILON)
+			if (fabs(cplex.getValue(ia[i])) > EPSILON)
 				cout << ia[i].getName() << " = " << cplex.getValue(ia[i]) << endl;
 		}
 		catch (IloException& e) { e.end(); }
@@ -27,10 +27,10 @@ void printvarmatrix(type &ia, IloCplex &cplex, const char *name = NULL, const ch
 		for (id j = 0; j < N; j++) {
 			try {
 				if (format) {
-					printf(format, abs(cplex.getValue(IJ(ia, i, j))) > EPSILON ?
+					printf(format, fabs(cplex.getValue(IJ(ia, i, j))) > EPSILON ?
 						       cplex.getValue(IJ(ia, i, j)) : 0);
 					printf(" ");
-				} else std::cout << (abs(cplex.getValue(IJ(ia, i, j))) > EPSILON ?
+				} else std::cout << (fabs(cplex.getValue(IJ(ia, i, j))) > EPSILON ?
 						     cplex.getValue(IJ(ia, i, j)) : 0) << " ";
 			}
 			catch (IloException& e) {
@@ -51,13 +51,13 @@ void printclusters(IloIntVarArray &xa, IloCplex &cplex) {
 	for (id i = 0; i < N; i++) {
 
 		for (id j = 0; j < i; j++)
-			if (abs(cplex.getValue(IJ(xa, i, j))) > EPSILON)
+			if (fabs(cplex.getValue(IJ(xa, i, j))) > EPSILON)
 				goto skip;
 
 		printf("[ ");
 
 		for (id j = i; j < N; j++)
-			if (abs(cplex.getValue(IJ(xa, i, j))) > EPSILON)
+			if (fabs(cplex.getValue(IJ(xa, i, j))) > EPSILON)
 				printf("%u ", j);
 
 		puts("]");
