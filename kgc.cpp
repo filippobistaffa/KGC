@@ -44,6 +44,29 @@ void printvarmatrix(type &ia, IloCplex &cplex, const char *name = NULL, const ch
 	puts("");
 }
 
+void printclusters(IloIntVarArray &xa, IloCplex &cplex) {
+
+	puts("Clusters:");
+
+	for (id i = 0; i < N; i++) {
+
+		for (id j = 0; j < i; j++)
+			if (abs(cplex.getValue(IJ(xa, i, j))) > EPSILON)
+				goto skip;
+
+		printf("[ ");
+
+		for (id j = i; j < N; j++)
+			if (abs(cplex.getValue(IJ(xa, i, j))) > EPSILON)
+				printf("%u ", j);
+
+		puts("]");
+		skip:;
+	}
+
+	puts("");
+}
+
 bool checksimmetry(IloIntVarArray &xa, IloCplex &cplex) {
 
 	for (id i = 0; i < N; i++)
@@ -98,29 +121,6 @@ bool checkflow(IloIntVarArray &xa, IloIntVarArray &sfa, IloFloatVarArray &fa, Il
 	}
 
 	return true;
-}
-
-void printclusters(IloIntVarArray &xa, IloCplex &cplex) {
-
-	puts("Clusters:");
-
-	for (id i = 0; i < N; i++) {
-
-		for (id j = 0; j < i; j++)
-			if (abs(cplex.getValue(IJ(xa, i, j))) > EPSILON)
-				goto skip;
-
-		printf("[ ");
-
-		for (id j = i; j < N; j++)
-			if (abs(cplex.getValue(IJ(xa, i, j))) > EPSILON)
-				printf("%u ", j);
-
-		puts("]");
-		skip:;
-	}
-
-	puts("");
 }
 
 int main(int argc, char *argv[]) {
