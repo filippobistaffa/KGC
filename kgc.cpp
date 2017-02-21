@@ -82,6 +82,9 @@ bool checktransitivity(IloIntVarArray &xa, IloCplex &cplex) {
 	for (id i = 0; i < N; i++)
 		for (id j = 0; j < N; j++)
 			for (id k = 0; k < N; k++) {
+				//printf("i = %u j = %u k = %u ij = %f ik = %f jk = %f\n", i, j, k,
+				//       cplex.getValue(IJ(xa, i, j)), cplex.getValue(IJ(xa, i, k)),
+				//       cplex.getValue(IJ(xa, j, k)));
 				if (!(cplex.getValue(IJ(xa, i, j)) +
 				      cplex.getValue(IJ(xa, j, k)) -
 				      2 * cplex.getValue(IJ(xa, i, k)) <= 1))
