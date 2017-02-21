@@ -2,7 +2,6 @@
 #define KGC_H_
 
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
@@ -20,6 +19,10 @@ using namespace std;
 #ifdef CSV
 #undef DEBUG
 #undef DOT
+#endif
+
+#ifdef DEBUG
+#include <assert.h>
 #endif
 
 #endif /* KGC_H_ */
