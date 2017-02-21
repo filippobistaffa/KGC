@@ -100,6 +100,29 @@ bool checkflow(IloIntVarArray &xa, IloIntVarArray &sfa, IloFloatVarArray &fa, Il
 	return true;
 }
 
+void printclusters(IloIntVarArray &xa, IloCplex &cplex) {
+
+	puts("Clusters:");
+
+	for (id i = 0; i < N; i++) {
+
+		for (id j = 0; j < i; j++)
+			if (abs(cplex.getValue(IJ(xa, i, j))) > EPSILON)
+				goto skip;
+
+		printf("[ ");
+
+		for (id j = i; j < N; j++)
+			if (abs(cplex.getValue(IJ(xa, i, j))) > EPSILON)
+				printf("%u ", j);
+
+		puts("]");
+		skip:;
+	}
+
+	puts("");
+}
+
 int main(int argc, char *argv[]) {
 
 	#ifndef CSV
@@ -438,6 +461,7 @@ int main(int argc, char *argv[]) {
 	printvararray(sfa, cplex);
 	printvararray(nla, cplex);
 	#endif
+	printclusters(xa, cplex);
 	env.out() << "Optimal solution = " << cplex.getObjValue() << endl;
 	printf("Clock elapsed time = %f\n", (double)(t2.tv_usec - t1.tv_usec) / 1e6 + t2.tv_sec - t1.tv_sec);
 	#endif
