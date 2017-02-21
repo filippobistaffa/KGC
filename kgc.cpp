@@ -416,7 +416,7 @@ int main(int argc, char *argv[]) {
 	// Print solution
 
 	#ifdef CSV
-	printf("%f,%f\n", cplex.getObjValue(), (double)(t2.tv_usec - t1.tv_usec) / 1e6 + t2.tv_sec - t1.tv_sec);
+	printf("%s,%f,%f\n", argv[1], cplex.getObjValue(), (double)(t2.tv_usec - t1.tv_usec) / 1e6 + t2.tv_sec - t1.tv_sec);
 	#else
 	puts("");
 	printvarmatrix(xa, cplex, "X");
