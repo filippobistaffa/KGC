@@ -232,7 +232,7 @@ int main(int argc, char *argv[]) {
 	puts("");
 	#endif
 
-	#ifdef LEADERS // LEADERS-only section
+	#ifdef LEADERS // begin LEADERS-only section
 
 	IloIntVarArray kia(env, N); // cardinality-up-to-i variables
 	IloIntVarArray sfa(env, N); // source flow variables
@@ -343,7 +343,7 @@ int main(int argc, char *argv[]) {
 	puts("");
 	#endif
 
-	#endif // LEADERS-only section
+	#endif // end LEADERS-only section
 
 	// Create objective expression
 
