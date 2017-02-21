@@ -408,8 +408,8 @@ int main(int argc, char *argv[]) {
 	#ifdef DEBUG
 	env.out() << "\nSolution status = " << cplex.getStatus() << endl;
 	env.out() << "Max kappa value = " << cplex.getQuality(IloCplex::KappaMax) << endl;
-	env.out() << "Percentage of numerically stable simplex bases = " << cplex.getQuality(IloCplex::KappaStable) << endl;
-	env.out() << "Percentage of numerically unstable simplex bases = " << cplex.getQuality(IloCplex::KappaUnstable) << endl;
+	env.out() << "% of numerically stable simplex bases = " << cplex.getQuality(IloCplex::KappaStable) << endl;
+	env.out() << "% of numerically unstable simplex bases = " << cplex.getQuality(IloCplex::KappaUnstable) << endl;
 	env.out() << "Kappa attention value = " << cplex.getQuality(IloCplex::KappaAttention) << endl;
 	#endif
 
