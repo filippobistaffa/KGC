@@ -247,6 +247,7 @@ int main(int argc, char *argv[]) {
 		IloExpr cardexpr(env);
 		for (id j = 0; j < i; j++) cardexpr += IJ(xa, i, j);
 		model.add(kia[i] == cardexpr);
+		// Incoming flow to first vertex of cluster (considering the index) must be equal to the cluster's size
 		model.add(IloIfThen(env, kia[i] == 0, sfa[i] == ka[i]));
 		model.add(IloIfThen(env, kia[i] > 0, sfa[i] == 0));
 		cardexpr.end();
@@ -300,6 +301,7 @@ int main(int argc, char *argv[]) {
 		//model.add(hla[i] <= nla[i]);
 		//model.add(nla[i] <= N * hla[i]);
 		lexpr.end();
+		// Non-singletons must have at least one leader
 		model.add(ka[i] <= 1 || nla[i] >= 1);
 	}
 
@@ -325,12 +327,14 @@ int main(int argc, char *argv[]) {
 			#ifdef DEBUG
 			cout << (IJ(fa, i, j) <= IJ(adj, i, j) * IJ(xa, i, j) * K) << endl;
 			#endif
+			// Flow on edge cannot be greater than K, and must be 0 if vertices are in different clusters
 			model.add((IJ(fa, i, j) <= IJ(adj, i, j) * IJ(xa, i, j) * K));
 			if (i != j && IJ(adj, i, j)) fexpr += IJ(fa, j, i) - IJ(fa, i, j);
 		}
 		#ifdef DEBUG
 		cout << (fexpr == 1) << endl;
 		#endif
+		// Flow from each edge to super-sink must be 1
 		model.add(fexpr == 1);
 		fexpr.end();
 	}
