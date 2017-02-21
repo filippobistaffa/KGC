@@ -370,6 +370,7 @@ int main(int argc, char *argv[]) {
 	cplex.setParam(IloCplex::Threads, 1);
 	#endif
 
+	// Force variables to be exact integers (might be slow)
 	//cplex.setParam(IloCplex::EpInt, 0);
 
 	#ifdef DEBUG
