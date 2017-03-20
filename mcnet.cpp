@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
 	// Allocate data structures
 
 	value *wa = (value *)malloc(sizeof(value) * (N + E));
-	uint8_t *adj = (uint8_t *)calloc(N * N, sizeof(uint8_t));
+	id *inc = (id *)malloc(sizeof(id) * 2 * E);
 	#ifdef LEADERS
 	uint8_t *la = (uint8_t *)calloc(N, sizeof(uint8_t));
 	#endif
@@ -132,11 +132,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	for (id i = N; i < N + E; i++) {
-		id v1, v2;
-		fscanf(f, "%u %u %f", &v1, &v2, wa + i);
-		IJ(adj, v1, v2) = IJ(adj, v2, v1) = i;
+		fscanf(f, "%u %u %f", inc + 2 * (i - N), inc + 2 * (i - N) + 1, wa + i);
 		#ifdef DOT
-		printf("\t%u -- %u [label=\"%f\"];\n", v1, v2, wa[i]);
+		printf("\t%u -- %u [label=\"%f\"];\n", X(inc, i - N), Y(inc, i - N), wa[i]);
 		#endif
 	}
 
@@ -384,7 +382,7 @@ int main(int argc, char *argv[]) {
 
 	// Free data structures
 
-	free(adj);
+	free(inc);
 	free(wa);
 	#ifdef LEADERS
 	free(la);
