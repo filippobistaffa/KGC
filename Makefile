@@ -1,7 +1,7 @@
 .PHONY: all
 
 ifndef OUT
-OUT=./kgc
+OUT=./mcnet
 endif
 
 CMP=g++
@@ -44,16 +44,16 @@ exit $$ret ;\
 fi
 endef
 
-all: kgc
+all: mcnet
 	@true
 
 -include ${DEPSUBDIR}/*.d
 
-kgc: ${COBJSUBDIR}/kgc.o
-	@${ECHOLD} kgc
+mcnet: ${COBJSUBDIR}/mcnet.o
+	@${ECHOLD} mcnet
 	@${CMP} ${OPT} ${LDIR} $^ ${LINK} -o ${OUT}
 
-${COBJSUBDIR}/kgc.o: kgc.cpp
+${COBJSUBDIR}/mcnet.o: mcnet.cpp
 	@$(compilec)
 
 clean:

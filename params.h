@@ -5,16 +5,13 @@
 #define PARALLEL
 
 // Enable debug messages (lots of output, reduces performance)
-//#define DEBUG
+#define DEBUG
 
 // Each non-singleton coalition must contain at least one leader
-#define LEADERS
+//#define LEADERS
 
 // Maximum number of leaders per cluster
-#define MAXLEADERS 1
+//#define MAXLEADERS 1
 
 // Print DOT code of graph
 #define DOT
-
-// Use conservative constraints for transitivity (slower but not prone to errors)
-//#define CONSERVATIVE

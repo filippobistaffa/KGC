@@ -1,5 +1,5 @@
 instance.h
 cobj
 dep
-kgc
+mcnet
 *.isg

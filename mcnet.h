@@ -1,5 +1,5 @@
-#ifndef KGC_H_
-#define KGC_H_
+#ifndef MCNET_H_
+#define MCNET_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,4 +25,4 @@ using namespace std;
 #include <assert.h>
 #endif
 
-#endif /* KGC_H_ */
+#endif /* MCNET_H_ */

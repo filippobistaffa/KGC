@@ -1,4 +1,4 @@
-#include "kgc.h"
+#include "mcnet.h"
 
 #define IJ(BUF, I, J) ((BUF)[(I) * N + (J)])
 
@@ -68,41 +68,6 @@ void printclusters(IloIntVarArray &xa, IloCplex &cplex) {
 	puts("");
 }
 
-bool checksimmetry(IloIntVarArray &xa, IloCplex &cplex) {
-
-	for (id i = 0; i < N; i++)
-		for (id j = 0; j < N; j++)
-			if (cplex.getValue(IJ(xa, i, j)) != cplex.getValue(IJ(xa, j, i)))
-				return false;
-
-	return true;
-}
-
-bool checktransitivity(IloIntVarArray &xa, IloCplex &cplex) {
-
-	for (id i = 0; i < N; i++)
-		for (id j = 0; j < N; j++)
-			for (id k = 0; k < N; k++) {
-				//printf("i = %u j = %u k = %u ij = %f ik = %f jk = %f\n", i, j, k,
-				//       cplex.getValue(IJ(xa, i, j)), cplex.getValue(IJ(xa, i, k)),
-				//       cplex.getValue(IJ(xa, j, k)));
-				if (!(cplex.getValue(IJ(xa, i, j)) +
-				      cplex.getValue(IJ(xa, j, k)) -
-				      2 * cplex.getValue(IJ(xa, i, k)) <= 1))
-					return false;
-				if (!(cplex.getValue(IJ(xa, i, k)) +
-				      cplex.getValue(IJ(xa, i, j)) -
-				      2 * cplex.getValue(IJ(xa, j, k)) <= 1))
-					return false;
-				if (!(cplex.getValue(IJ(xa, j, k)) +
-				      cplex.getValue(IJ(xa, i, k)) -
-				      2 * cplex.getValue(IJ(xa, i, j)) <= 1))
-					return false;
-			}
-
-	return true;
-}
-
 bool checkflow(IloIntVarArray &xa, IloIntVarArray &sfa, IloFloatVarArray &fa, IloCplex cplex, const uint8_t *adj) {
 
 	for (id i = 0; i < N; i++) {
@@ -135,7 +100,7 @@ int main(int argc, char *argv[]) {
 
 	// Allocate data structures
 
-	value *wm = (value *)calloc(N * N, sizeof(value));
+	value *wa = (value *)malloc(sizeof(value) * (N + E));
 	uint8_t *adj = (uint8_t *)calloc(N * N, sizeof(uint8_t));
 	#ifdef LEADERS
 	uint8_t *la = (uint8_t *)calloc(N, sizeof(uint8_t));
@@ -160,20 +125,18 @@ int main(int argc, char *argv[]) {
 			la[i] = 1;
 			#endif
 		}
-		IJ(wm, i, i) = atof(pch);
+		wa[i] = atof(pch);
 		#ifdef DOT
-		printf("\t%u -- %u [label=\"%f\"];\n", i, i, IJ(wm, i, i));
+		printf("\t%u -- %u [label=\"%f\"];\n", i, i, wa[i]);
 		#endif
 	}
 
-	for (id i = 0; i < E; i++) {
+	for (id i = N; i < N + E; i++) {
 		id v1, v2;
-		value w;
-		fscanf(f, "%u %u %f", &v1, &v2, &w);
-		IJ(wm, v1, v2) = IJ(wm, v2, v1) = w;
-		IJ(adj, v1, v2) = IJ(adj, v2, v1) = 1;
+		fscanf(f, "%u %u %f", &v1, &v2, wa + i);
+		IJ(adj, v1, v2) = IJ(adj, v2, v1) = i;
 		#ifdef DOT
-		printf("\t%u -- %u [label=\"%f\"];\n", v1, v2, w);
+		printf("\t%u -- %u [label=\"%f\"];\n", v1, v2, wa[i]);
 		#endif
 	}
 
@@ -183,10 +146,7 @@ int main(int argc, char *argv[]) {
 	fclose(f);
 
 	#ifdef DEBUG
-	puts("Weights:");
-	for (id i = 0; i < N; i++)
-		printbuf(wm + i * N, N, NULL, "%+08.4f");
-	puts("");
+	printbuf(wa, N + E, "Weights");
 	#ifdef LEADERS
 	printbuf(la, N, "Leaders", "%hu", "\n");
 	puts("");
@@ -196,52 +156,21 @@ int main(int argc, char *argv[]) {
 	// Create CPLEX model
 
 	IloEnv env;
-	IloIntVarArray xa(env, N * N);
+	IloIntVarArray xa(env, N + E);
 	IloModel model(env);
 	ostringstream ostr;
 
 	// Create decision variables
 
-	for (id i = 0; i < N; i++)
-		for (id j = 0; j < N; j++) {
-			ostr << "X_" << i << "," << j;
-			IJ(xa, i, j) = IloIntVar(env, 0, 1, ostr.str().c_str());
-			//IJ(xa, i, j) = IloIntVar(env, IJ(xk, i, j), IJ(xk, i, j), ostr.str().c_str());
-			ostr.str("");
-		}
-
-	// Reflexivity constraints
-
-	for (id i = 0; i < N; i++)
-		model.add(IJ(xa, i, i) == 1);
-
-	// Simmetry constraints
-
-	for (id i = 0; i < N; i++)
-		for (id j = 0; j < N; j++) {
-			model.add(xa[i * N + j] == xa[j * N + i]);
-			model.add(xa[j * N + i] == xa[i * N + j]);
-		}
-
-	// Transitivity constraints
-
-	for (id i = 0; i < N; i++)
-		for (id j = 0; j < N; j++)
-			for (id k = 0; k < N; k++) {
-				#ifdef CONSERVATIVE
-				model.add(IloIfThen(env, IJ(xa, i, j) == 1 && IJ(xa, j, k) == 1, IJ(xa, i, k) == 1));
-				model.add(IloIfThen(env, IJ(xa, i, k) == 1 && IJ(xa, i, j) == 1, IJ(xa, j, k) == 1));
-				model.add(IloIfThen(env, IJ(xa, j, k) == 1 && IJ(xa, i, k) == 1, IJ(xa, i, j) == 1));
-				#else
-				model.add(IJ(xa, i, j) + IJ(xa, j, k) - 2 * IJ(xa, i, k) <= 1);
-				model.add(IJ(xa, i, k) + IJ(xa, i, j) - 2 * IJ(xa, j, k) <= 1);
-				model.add(IJ(xa, j, k) + IJ(xa, i, k) - 2 * IJ(xa, i, j) <= 1);
-				#endif
-			}
+	for (id i = 0; i < N + E; i++) {
+		ostr << "X_" << i;
+		xa[i] = IloIntVar(env, 0, 1, ostr.str().c_str());
+		ostr.str("");
+	}
 
 	// Cardinality constraints
 
-	IloIntVarArray ka(env, N); // cardinality variables
+	/*IloIntVarArray ka(env, N); // cardinality variables
 
 	#ifdef DEBUG
 	puts("Cardinality constraints:");
@@ -259,11 +188,11 @@ int main(int argc, char *argv[]) {
 		model.add(ka[i] == cardexpr);
 		model.add(cardexpr <= K);
 		cardexpr.end();
-	}
+	}*/
 
-	#ifdef DEBUG
-	puts("");
-	#endif
+	//#ifdef DEBUG
+	//puts("");
+	//#endif
 
 	#ifdef LEADERS // begin LEADERS-only section
 
@@ -382,9 +311,8 @@ int main(int argc, char *argv[]) {
 
 	IloExpr objexpr(env);
 
-	for (id i = 0; i < N; i++)
-		for (id j = i; j < N; j++)
-			objexpr += IJ(wm, i, j) * IJ(xa, i, j);
+	for (id i = 0; i < N + E; i++)
+		objexpr += wa[i] * xa[i];
 
 	#ifdef DEBUG
 	cout << "Objective function:" << endl << objexpr << endl << endl;
@@ -410,10 +338,6 @@ int main(int argc, char *argv[]) {
 	// Force variables to be exact integers (might be slow)
 	//cplex.setParam(IloCplex::EpInt, 0);
 
-	#ifdef DEBUG
-	cplex.setParam(IloCplex::MIPKappaStats, CPX_MIPKAPPA_FULL);
-	#endif
-
 	#ifdef TOLERANCE
 	cplex.setParam(IloCplex::EpGap, TOLERANCE);
 	#endif
@@ -433,22 +357,10 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	#ifdef DEBUG
-	assert(checksimmetry(xa, cplex));
-	assert(checktransitivity(xa, cplex));
-	#ifdef LEADERS
-	assert(checkflow(xa, sfa, fa, cplex, adj));
-	#endif
-	#endif
-
 	gettimeofday(&t2, NULL);
 
 	#ifdef DEBUG
 	env.out() << "\nSolution status = " << cplex.getStatus() << endl;
-	env.out() << "Max kappa value = " << cplex.getQuality(IloCplex::KappaMax) << endl;
-	env.out() << "% of numerically stable simplex bases = " << cplex.getQuality(IloCplex::KappaStable) << endl;
-	env.out() << "% of numerically unstable simplex bases = " << cplex.getQuality(IloCplex::KappaUnstable) << endl;
-	env.out() << "Kappa attention value = " << cplex.getQuality(IloCplex::KappaAttention) << endl;
 	#endif
 
 	// Print solution
@@ -457,7 +369,7 @@ int main(int argc, char *argv[]) {
 	printf("%s,%f,%f\n", argv[1], cplex.getObjValue(), (double)(t2.tv_usec - t1.tv_usec) / 1e6 + t2.tv_sec - t1.tv_sec);
 	#else
 	puts("");
-	printvarmatrix(xa, cplex, "X");
+	printvararray(xa, cplex);
 	#ifdef LEADERS
 	printvarmatrix(fa, cplex, "F");
 	printvararray(ka, cplex);
@@ -465,7 +377,7 @@ int main(int argc, char *argv[]) {
 	printvararray(sfa, cplex);
 	printvararray(nla, cplex);
 	#endif
-	printclusters(xa, cplex);
+	//printclusters(xa, cplex);
 	env.out() << "Optimal solution = " << cplex.getObjValue() << endl;
 	printf("Clock elapsed time = %f\n", (double)(t2.tv_usec - t1.tv_usec) / 1e6 + t2.tv_sec - t1.tv_sec);
 	#endif
@@ -473,7 +385,7 @@ int main(int argc, char *argv[]) {
 	// Free data structures
 
 	free(adj);
-	free(wm);
+	free(wa);
 	#ifdef LEADERS
 	free(la);
 	#endif
