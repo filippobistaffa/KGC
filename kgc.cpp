@@ -69,7 +69,7 @@ void printclusters(IloIntVarArray &xa, IloCplex &cplex, uint8_t *la, char *filen
 			if (fabs(cplex.getValue(IJ(xa, i, j))) > EPSILON) {
 				printf("%u ", j);
 				if (write) {
-					fprintf(output, "%s%u ", (la && la[j]) ? "*" : "", j);
+					fprintf(output, "%s%u ", (la ? (la[j] ? "*" : "") : "*"), j);
 				}
 			}
 
