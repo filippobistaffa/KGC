@@ -45,13 +45,14 @@ void printvarmatrix(type &ia, IloCplex &cplex, const char *name = NULL, const ch
 	puts("");
 }
 
-void printclusters(IloIntVarArray &xa, IloCplex &cplex, char *filename) {
+void printclusters(IloIntVarArray &xa, IloCplex &cplex, uint8_t *la, char *filename) {
 
 	bool write = filename != nullptr;
 	FILE *output;
 
 	if (write) {
 		output = fopen(filename, "w+");
+		fprintf(output, "%u\n%u\n", N, K);
 	}
 
 	puts("Clusters:");
@@ -68,12 +69,13 @@ void printclusters(IloIntVarArray &xa, IloCplex &cplex, char *filename) {
 			if (fabs(cplex.getValue(IJ(xa, i, j))) > EPSILON) {
 				printf("%u ", j);
 				if (write) {
-					fprintf(output, "%u ", j);
+					fprintf(output, "%s%u ", (la && la[j]) ? "*" : "", j);
 				}
 			}
 
 		puts("]");
 		if (write) {
+			fseek(output, -1, SEEK_CUR);
 			fprintf(output, "\n");
 		}
 		skip:;
@@ -156,6 +158,8 @@ int main(int argc, char *argv[]) {
 	uint8_t *adj = (uint8_t *)calloc(N * N, sizeof(uint8_t));
 	#ifdef LEADERS
 	uint8_t *la = (uint8_t *)calloc(N, sizeof(uint8_t));
+	#else
+	uint8_t *la = nullptr;
 	#endif
 
 	// Read input file
@@ -482,7 +486,7 @@ int main(int argc, char *argv[]) {
 	printvararray(sfa, cplex);
 	printvararray(nla, cplex);
 	#endif
-	printclusters(xa, cplex, (argc == 3) ? argv[2] : nullptr);
+	printclusters(xa, cplex, la, (argc == 3) ? argv[2] : nullptr);
 	env.out() << "Optimal solution = " << cplex.getObjValue() << endl;
 	printf("Clock elapsed time = %f\n", (double)(t2.tv_usec - t1.tv_usec) / 1e6 + t2.tv_sec - t1.tv_sec);
 	#endif
