@@ -45,7 +45,14 @@ void printvarmatrix(type &ia, IloCplex &cplex, const char *name = NULL, const ch
 	puts("");
 }
 
-void printclusters(IloIntVarArray &xa, IloCplex &cplex) {
+void printclusters(IloIntVarArray &xa, IloCplex &cplex, char *filename) {
+
+	bool write = filename != nullptr;
+	FILE *output;
+
+	if (write) {
+		output = fopen(filename, "w+");
+	}
 
 	puts("Clusters:");
 
@@ -58,14 +65,24 @@ void printclusters(IloIntVarArray &xa, IloCplex &cplex) {
 		printf("[ ");
 
 		for (id j = i; j < N; j++)
-			if (fabs(cplex.getValue(IJ(xa, i, j))) > EPSILON)
+			if (fabs(cplex.getValue(IJ(xa, i, j))) > EPSILON) {
 				printf("%u ", j);
+				if (write) {
+					fprintf(output, "%u ", j);
+				}
+			}
 
 		puts("]");
+		if (write) {
+			fprintf(output, "\n");
+		}
 		skip:;
 	}
 
 	puts("");
+	if (write) {
+		fclose(output);
+	}
 }
 
 bool checksimmetry(IloIntVarArray &xa, IloCplex &cplex) {
@@ -465,7 +482,7 @@ int main(int argc, char *argv[]) {
 	printvararray(sfa, cplex);
 	printvararray(nla, cplex);
 	#endif
-	printclusters(xa, cplex);
+	printclusters(xa, cplex, (argc == 3) ? argv[2] : nullptr);
 	env.out() << "Optimal solution = " << cplex.getObjValue() << endl;
 	printf("Clock elapsed time = %f\n", (double)(t2.tv_usec - t1.tv_usec) / 1e6 + t2.tv_sec - t1.tv_sec);
 	#endif

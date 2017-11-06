@@ -4,10 +4,11 @@ red='\033[0;31m'			# Red
 nc='\033[0m'				# No color
 re='^[0-9]+$'				# Regular expression to detect natural numbers
 k=5					# Default k = 5
+s=""
 
-usage() { echo -e "Usage: $0 -i <filename> [-k <max_card>] [-c]\n-i\tInput filename\n-s\tMaximum cardinality (optional, default k = 5)\n-c\tEnable CSV output (optional)" 1>&2; exit 1; }
+usage() { echo -e "Usage: $0 -i <filename> [-k <max_card>] [-c] [-s <filename>]\n-i\tInput filename\n-s\tMaximum cardinality (optional, default k = 5)\n-c\tEnable CSV output (optional)\n-s\tWrite solution to file (optional)" 1>&2; exit 1; }
 
-while getopts ":i:k:c" o; do
+while getopts ":i:k:c:s:" o; do
 	case "${o}" in
 	i)
 		i=${OPTARG}
@@ -26,6 +27,19 @@ while getopts ":i:k:c" o; do
 		;;
 	c)
 		c=1
+		;;
+	s)
+		s=${OPTARG}
+		echo $s
+		touch $s 2> /dev/null
+		rc=$?
+		if [[ $rc != 0 ]]
+		then
+			echo -e "${red}Unable to create $s${nc}" 1>&2
+			exit
+		else
+			rm $s
+		fi
 		;;
 	\?)
 		echo -e "${red}-$OPTARG is not a valid option!${nc}\n" 1>&2
@@ -75,5 +89,5 @@ if [[ $? == 0 ]]
 then
 	bin=$0
 	bin=${bin%???}
-	$bin $i
+	$bin $i $s
 fi
