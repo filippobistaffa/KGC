@@ -8,7 +8,7 @@ s=""
 
 usage() { echo -e "Usage: $0 -i <filename> [-k <max_card>] [-c] [-s <filename>]\n-i\tInput filename\n-s\tMaximum cardinality (optional, default k = 5)\n-c\tEnable CSV output (optional)\n-s\tWrite solution to file (optional)" 1>&2; exit 1; }
 
-while getopts ":i:k:c:s:" o; do
+while getopts ":i:k:s:c" o; do
 	case "${o}" in
 	i)
 		i=${OPTARG}
