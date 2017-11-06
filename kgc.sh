@@ -30,7 +30,6 @@ while getopts ":i:k:c:s:" o; do
 		;;
 	s)
 		s=${OPTARG}
-		echo $s
 		touch $s 2> /dev/null
 		rc=$?
 		if [[ $rc != 0 ]]
